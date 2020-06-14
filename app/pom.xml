@@ -1,0 +1,67 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>io.neocdtv</groupId>
+  <artifactId>app</artifactId>
+  <packaging>war</packaging>
+  <version>1.0-SNAPSHOT</version>
+  <name>app Maven Webapp</name>
+  <url>http://maven.apache.org</url>
+  <dependencies>
+	<dependency>
+	      <groupId>junit</groupId>
+	      <artifactId>junit</artifactId>
+	      <version>3.8.1</version>
+	      <scope>test</scope>
+	</dependency>
+    <!-- https://mvnrepository.com/artifact/fish.payara.extras/payara-micro -->
+	<dependency>
+		<groupId>fish.payara.extras</groupId>
+		<artifactId>payara-embedded-web</artifactId>
+		<version>5.201</version>
+		<scope>provided</scope>
+	</dependency>
+
+  </dependencies>
+  <build>
+    <finalName>app</finalName>
+    <plugins>
+	<plugin>
+	    <groupId>org.codehaus.mojo</groupId>
+	    <artifactId>versions-maven-plugin</artifactId>
+	    <version>2.5</version>
+	    <configuration>
+		<generateBackupPoms>false</generateBackupPoms>
+	    </configuration>
+	</plugin>
+	<plugin>
+	    <groupId>org.apache.maven.plugins</groupId>
+	    <artifactId>maven-compiler-plugin</artifactId>
+	    <version>3.8.0</version>
+	    <configuration>
+		<release>11</release>
+	    </configuration>
+	</plugin>
+	<plugin>
+	    <groupId>org.apache.maven.plugins</groupId>
+	    <artifactId>maven-surefire-plugin</artifactId>
+	    <version>2.22.0</version>
+	    <configuration>
+		<argLine>
+		    --illegal-access=permit
+		</argLine>
+	    </configuration>
+	</plugin>
+	<plugin>
+	    <groupId>org.apache.maven.plugins</groupId>
+	    <artifactId>maven-failsafe-plugin</artifactId>
+	    <version>2.22.0</version>
+	    <configuration>
+		<argLine>
+		    --illegal-access=permit
+		</argLine>
+	    </configuration>
+	</plugin>
+    </plugins>
+  </build>
+</project>
