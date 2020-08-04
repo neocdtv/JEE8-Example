@@ -7,6 +7,15 @@
   <packaging>jar</packaging>
   <version>1.0-SNAPSHOT</version>
 
+  <properties>
+    <!-- the database parameter can be overwritten with environment variables -->
+    <db.url>jdbc:postgresql://localhost:5432/exampledb</db.url>
+    <db.connect.user>con_user</db.connect.user>
+    <db.resource.user>res_user</db.resource.user>
+    <db.resource.password>pw</db.resource.password>
+    <db.schema>exampleschema</db.schema>
+  </properties>
+
   <dependencies>
     <dependency>
       <groupId>org.postgresql</groupId>
@@ -20,4 +29,26 @@
       <version>6.0.4</version>
     </dependency>
   </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.flywaydb</groupId>
+        <artifactId>flyway-maven-plugin</artifactId>
+        <version>6.0.4</version>
+        <configuration>
+          <url>${db.url}</url>
+          <user>${db.resource.user}</user>
+          <password>${db.resource.password}</password>
+          <schemas>${db.schema}</schemas>
+          <table>t_flyway_version</table>
+          <placeholders>
+            <connect.user>${db.connect.user}</connect.user>
+            <resource.user>${db.resource.user}</resource.user>
+            <db.schema>${db.schema}</db.schema>
+          </placeholders>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
 </project>
