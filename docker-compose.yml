@@ -1,0 +1,30 @@
+version: "3.7"
+
+services:
+  app:
+    build: app/
+    image: example/app
+    ports:
+      - "$APP_HTTP_PORT:$APP_HTTP_PORT"
+      - "$APP_HTTPS_PORT:$APP_HTTPS_PORT"
+      - "$APP_DEBUG_PORT:$APP_DEBUG_PORT"
+    depends_on:
+      - database
+    environment:
+      - DB_HOST=${DB_HOST}
+      - DB_USER=${CONNECT_USER}
+      - DB_PASS=${CONNECT_PASS}
+  database:
+    build: database/
+    image: example/db
+    ports:
+      - "$DB_PORT:$DB_PORT"
+    environment:
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - CONNECT_USER=${CONNECT_USER}
+      - CONNECT_PASS=${CONNECT_PASS}
+      - RESOURCE_USER=${RESOURCE_USER}
+      - RESOURCE_PASS=${RESOURCE_PASS}
+      - SCHEMA=${SCHEMA}
