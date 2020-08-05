@@ -1,2 +1,2 @@
 #!/bin/bash
-docker run -p 8080:8080 --env-file ./.env example/app
+source <(grep -v '^ *#' .env | grep '[^ ] *=' | awk '{split($0,a,"="); print gensub(/\./, "_", "g", "export " a[1]) "=" a[2]}')

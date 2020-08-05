@@ -1,2 +1,5 @@
 #!/bin/bash
-docker run -p 8080:8080 --env-file ./.env example/app
+source ./setup_vars.sh
+rm -r /tmp/payaraMicroExtracted
+java -XX:+UsePerfData -XX:+TieredCompilation -XX:TieredStopAtLevel=1 -XX:+UseParallelGC -Xverify:none -Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address="$APP_DEBUG_PORT" -jar /var/tmp/payara-micro.jar --deploy app/target/app --nocluster --contextroot / --port "$APP_HTTP_PORT" --rootDir /tmp/payaraMicroExtracted
+

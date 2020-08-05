@@ -5,13 +5,12 @@ import javax.ws.rs.core.Application;
 import java.util.HashSet;
 import java.util.Set;
 
-@ApplicationPath("/")
+@ApplicationPath("example")
 public class JEE8App extends Application {
 
   @Override
   public Set<Class<?>> getClasses() {
     final Set<Class<?>> classes = new HashSet<>();
-    // register root resource
     classes.add(StatusResource.class);
     return classes;
   }
