@@ -1,22 +1,24 @@
 package io.neocdtv.jee8.app;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
 import java.math.BigInteger;
 
 @Entity
 @Table(name = "t_person")
 public class Person {
 
+  public static final String SEQUENCE_NAME = "sq_person";
+
   @Id
+  @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = SEQUENCE_NAME)
+  @SequenceGenerator(name = SEQUENCE_NAME, sequenceName = SEQUENCE_NAME, allocationSize = 1)
+
   private BigInteger id;
 
-  @Column
+  @Column(name = "first_name")
   private String firstName;
 
-  @Column
+  @Column(name = "last_name")
   private String lastName;
 
   public BigInteger getId() {
