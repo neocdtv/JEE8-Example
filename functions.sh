@@ -5,14 +5,41 @@ PAYARA_MICRO_ROOT_DIR="/tmp/payaraMicroJEE8Example"
 TMP_DIR="/var/tmp"
 PAYARA_APP="$TMP_DIR/payara-micro-$PAYARA_VERSION.jar"
 
+docker_build() {
+  docker-compose build
+}
+
+docker_build_app() {
+  docker-compose build app
+}
+
+docker_build_database() {
+  docker-compose build database
+}
+
+docker_run_database() {
+  docker-compose up database -d
+  is_db_ready
+  mvn flyway:migrate -f database/
+}
+
+docker_clean() {
+  echo "DOCKER::CLEAN"
+  docker kill jee8-example_app_1
+  docker kill jee8-example_database_1
+  docker rm -f jee8-example_app_1
+  docker rm -f jee8-example_database_1
+  docker rmi -f example/app
+  docker rmi -f example/db
+}
+
 build_app() {
   mvn clean install -f app/
   echo "" > app/target/app/.reload
 }
 
 build_database() {
-  mvn clean install -f app/
-  echo "" > app/target/app/.reload
+  mvn clean install -f database/
 }
 
 build_app_minimal() {
@@ -59,7 +86,8 @@ criu_dump() {
 
 criu_restore() {
   echo "CRIU::RESTORE"
-	sudo criu-ns restore -vvvv --shell-job --log-file criu-restore.log --tcp-established --images-dir "$CRIU_IMAGE_DIR"
+	sudo criu-ns restore -vvvv --shell-job --log-file criu-restore.log --tcp-established --images-dir "$CRIU_IMAGE_DIR" &
+	is_app_ready
 }
 
 clean_up() {
@@ -76,9 +104,31 @@ get_app_server() {
 	fi
 }
 
-is_app_running() {
-  # TODO: pool, curl on status url
-  sleep 18
+is_app_ready() {
+  check_response_code status 200
+}
+
+check_response_code() {
+  URL=http://$APP_HOST:$APP_HTTP_PORT/$1
+  NEXT_WAIT_TIME=1
+  MAX_WAIT_TIME=60
+  SLEEP_TIME=0.25 # 250ms
+  until [ $NEXT_WAIT_TIME -gt $MAX_WAIT_TIME ] || [ $(curl -s -o /dev/null -w "%{http_code}" $URL) == $2 ]; do
+    echo "CHECK::APP - Waiting for application to be ready to handle http traffic. Check url is $URL. Check $NEXT_WAIT_TIME of $MAX_WAIT_TIME."
+    sleep $SLEEP_TIME
+    (( NEXT_WAIT_TIME++ ))
+  done
+  if [ $NEXT_WAIT_TIME -gt $MAX_WAIT_TIME ]
+  then
+    echo "CHECK::APP - Application is not ready to handle http traffic. Waited $MAX_WAIT_TIME x $SLEEP_TIME sec. Check url was $URL"
+  else
+    echo "CHECK::APP - Application is ready to handle http traffic. Check url was $URL"
+  fi
+}
+
+is_db_ready() {
+  # TODO:
+  sleep 10
 }
 
 # If you include this function in a another shell script and try using with criu it will fail. This has something todo with the fact that the script opens a new session (needs verification)
@@ -91,7 +141,7 @@ run_app() {
 	else
 		get_app_server
 		run_app_server
-		is_app_running
+		is_app_ready
 		criu_dump
 		criu_restore
   fi
