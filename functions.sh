@@ -40,13 +40,13 @@ app_clean() {
 
 app_build() {
   print_info "APP::BUILD"
-  mvn clean -f app/
-  app_rebuild
+  mvn -T4 clean prepare-package war:exploded -Dmaven.test.skip -f app/
+  app_redeploy
 }
 
 app_rebuild() {
   print_info "APP::REBUILD"
-  mvn prepare-package war:exploded -Dmaven.test.skip -f app/
+  mvn -T4 prepare-package war:exploded -Dmaven.test.skip -f app/
   app_redeploy
 }
 
@@ -55,6 +55,23 @@ app_redeploy() {
   # get status timestamp
   echo "" > app/target/app/.reload
   # wait for status timestamp to change
+  # do it like in app_run
+  # remove current criu dump
+  # create criu dump
+  # restore
+}
+
+payara_download() {
+  local prefix="PAYARA::DOWNLOAD"
+  print_info $prefix
+  # check for latests payara version (https://repo1.maven.org/maven2/fish/payara/extras/payara-micro/maven-metadata.xml metadata/versioning/latest or release?) and inform if differ from $PAYARA_VERSION
+  if [ ! -f "$PAYARA_APP" ]
+  then
+    print_info "$prefix - Payara $PAYARA_VERSION not available. Starting download..."
+    curl "https://repo1.maven.org/maven2/fish/payara/extras/payara-micro/$PAYARA_VERSION/payara-micro-$PAYARA_VERSION.jar" -o "$PAYARA_APP"
+  else 
+    print_info "$prefix - Payara $PAYARA_VERSION available. No download needed."
+  fi
 }
 
 payara_kill() {
@@ -117,15 +134,6 @@ criu_restore() {
 clean_up() {
   sudo rm -fr "$CRIU_IMAGE_DIR"
   sudo rm -fr "$PAYARA_MICRO_ROOT_DIR"
-}
-
-payara_download() {
-  print_info "PAYARA::DOWNLOAD"
-  # check for latests payara version (https://repo1.maven.org/maven2/fish/payara/extras/payara-micro/maven-metadata.xml metadata/versioning/latest or release?) and inform if differ from $PAYARA_VERSION
-  if [ ! -f "$PAYARA_APP" ]
-  then
-    curl "https://repo1.maven.org/maven2/fish/payara/extras/payara-micro/$PAYARA_VERSION/payara-micro-$PAYARA_VERSION.jar" -o "$PAYARA_APP"
-  fi
 }
 
 is_app_ready() {
