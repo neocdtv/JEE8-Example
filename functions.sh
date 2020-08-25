@@ -4,34 +4,35 @@ CRIU_IMAGE_DIR="$TMP_DIR/payaraMicroJEE8ExampleImage"
 PAYARA_MICRO_ROOT_DIR="$TMP_DIR/payaraMicroJEE8Example"
 PAYARA_VERSION="5.2020.3";
 PAYARA_APP="$TMP_DIR/payara-micro-$PAYARA_VERSION.jar"
+DOCKER_DATABASE_CONTAINER_NAME="jee8-example_database_1"
+DOCKER_APP_CONTAINER_NAME="jee8-example_app_1"
+
 
 database_build() {
   database_clean
   print_info "DATABASE::BUILD"
-  docker-compose up -d database
-  is_db_ready
-  mvn  flyway:migrate -f database/
+  docker-compose build database
 }
 
 database_run() {
   print_info "DATABASE::RUN"
   docker-compose up -d database
-  is_db_ready
+  is_database_ready
   mvn prepare-package flyway:migrate -f database/
 }
 
 database_clean() {
   print_info "DATABASE::CLEAN"
-  docker kill jee8-example_database_1
-  docker rm -f jee8-example_database_1
+  docker kill $DOCKER_DATABASE_CONTAINER_NAME
+  docker rm -f $DOCKER_DATABASE_CONTAINER_NAME
   docker rmi -f example/db
   mvn clean -f database/
 }
 
 app_clean() {
   print_info "APP::CLEAN"
-  docker kill jee8-example_app_1
-  docker rm -f jee8-example_app_1
+  docker kill $DOCKER_APP_CONTAINER_NAME
+  docker rm -f $DOCKER_APP_CONTAINER_NAME
   docker rmi -f example/app
   payara_kill
   mvn clean -f app/
@@ -137,24 +138,41 @@ check_response_code() {
   NEXT_WAIT_TIME=1
   MAX_WAIT_TIME=60
   SLEEP_TIME=0.25 # 250ms
-  until [ $NEXT_WAIT_TIME -gt $MAX_WAIT_TIME ] || [ $(curl -s -o /dev/null -w "%{http_code}" $URL) == $2 ]; do
-    print_info "$prefix - Waiting for application to handle http traffic. Check url is $URL. Check $NEXT_WAIT_TIME of $MAX_WAIT_TIME."
+  until [ $NEXT_WAIT_TIME -gt $MAX_WAIT_TIME ] || [ $(curl -s -o /dev/null -w "%{http_code}" $URL) == $2 ]
+  do
+    print_info "$prefix - Waiting for application to handle http traffic. Checking with url $URL. Check $NEXT_WAIT_TIME of $MAX_WAIT_TIME."
     sleep $SLEEP_TIME
     (( NEXT_WAIT_TIME++ ))
   done
   if [ $NEXT_WAIT_TIME -gt $MAX_WAIT_TIME ]
   then
-    print_error "$prefix - Application is not ready to handle http traffic. Waited $MAX_WAIT_TIME x $SLEEP_TIME sec. Check url was $URL"
+    print_error "$prefix - Application is not ready to handle http traffic. Waited $MAX_WAIT_TIME x $SLEEP_TIME sec. Checked url was $URL."
     return 1;
   else
     local waited=$((NEXT_WAIT_TIME-1))
-    print_info "$prefix - Application is ready to handle http traffic. Waited $waited x $SLEEP_TIME sec. Check url was $URL"
+    print_info "$prefix - Application is ready to handle http traffic. Waited $waited x $SLEEP_TIME sec. Checked url was $URL."
   fi
 }
 
-is_db_ready() {
-  # TODO:
-  sleep 5
+is_database_ready() {
+  local prefix="CHECK::DATABASE"
+  NEXT_WAIT_TIME=1
+  MAX_WAIT_TIME=60
+  SLEEP_TIME=0.25 # 250ms
+  until [ $NEXT_WAIT_TIME -gt $MAX_WAIT_TIME ] || docker exec -it $DOCKER_DATABASE_CONTAINER_NAME pg_isready --host=$DB_HOST --port=$DB_PORT --username=$RESOURCE_USER --dbname=$DB_NAME &>/dev/null
+  do
+    print_info "$prefix - Waiting for database connection to be available. Checking with host $DB_HOST, port $DB_PORT, user $RESOURCE_USER, database name $DB_NAME. Check $NEXT_WAIT_TIME of $MAX_WAIT_TIME."
+    sleep $SLEEP_TIME
+    (( NEXT_WAIT_TIME++ ))
+  done
+  if [ $NEXT_WAIT_TIME -gt $MAX_WAIT_TIME ]
+  then
+    print_error "$prefix - Database connection is not ready. Waited $MAX_WAIT_TIME x $SLEEP_TIME sec. Checked with host $DB_HOST, port $DB_PORT, user $RESOURCE_USER, database name $DB_NAME."
+    return 1;
+  else
+    local waited=$((NEXT_WAIT_TIME-1))
+    print_info "$prefix - Database connection is ready. Waited $waited x $SLEEP_TIME sec. Checking with host $DB_HOST, port $DB_PORT, user $RESOURCE_USER, database name $DB_NAME."
+  fi
 }
 
 # If you include this function in a another shell script and try using with criu it will fail. This has something todo with the fact that the script opens a new session (needs verification)
