@@ -18,14 +18,22 @@ database_run() {
   print_info "DATABASE::RUN"
   docker-compose up -d database
   is_database_ready
+  if [ $? -ne 0 ]
+    then
+      return 1;
+  fi
   mvn prepare-package flyway:migrate -f database/
 }
 
 database_clean() {
   print_info "DATABASE::CLEAN"
+  mvn flyway:clean -f database/
   docker kill $DOCKER_DATABASE_CONTAINER_NAME
-  docker rm -f $DOCKER_DATABASE_CONTAINER_NAME
-  docker rmi -f example/db
+  if [ "$1" == "hard" ] 
+  then 
+    docker rm -f $DOCKER_DATABASE_CONTAINER_NAME
+    docker rmi -f example/db
+  fi
   mvn clean -f database/
 }
 
@@ -193,7 +201,11 @@ app_run() {
 	else
 		payara_download
 		payara_run
-		is_app_ready # check return code and return if !=0
+		is_app_ready
+    if [ $? -ne 0 ]
+    then
+      return 1;
+    fi
 		app_dump
 		app_restore
   fi
