@@ -225,7 +225,7 @@ app_run() {
 }
 
 COLOR_GREEN='\033[1;34m'
-COLOR_BROWN='\033[0;33m'#  
+COLOR_BROWN='\033[0;33m'
 COLOR_RED='\033[0;31m'
 FORMAT_BOLD='\033[1m'
 FORMAT_RESET='\033[0m'
@@ -237,7 +237,7 @@ print_info() {
 }
 
 print_warn() {
-  echo -e "${COLOR_BROWN}[WARNING]${FORMAT_RESET} ------------------------------------------------------------------------"
+  echo -e "${COLOR_BROWN}[WARNING]${FORMAT_RESET} ------"$PAYARA_MICRO_ROOT_DIR"------------------------------------------------------------------"
   echo -e "${COLOR_BROWN}[WARNING]${FORMAT_RESET}${FORMAT_BOLD} $1 ${FORMAT_RESET}"
   echo -e "${COLOR_BROWN}[WARNING]${FORMAT_RESET} ------------------------------------------------------------------------"
 }
