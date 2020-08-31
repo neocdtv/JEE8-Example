@@ -8,6 +8,13 @@ DOCKER_DATABASE_CONTAINER_NAME="jee8-example_database_1"
 DOCKER_APP_CONTAINER_NAME="jee8-example_app_1"
 
 
+jee8_example_all() {
+  database_build
+  database_run
+  app_build
+  app_run  
+}
+
 database_build() {
   database_clean
   print_info "DATABASE::BUILD"
@@ -48,18 +55,21 @@ app_clean() {
     sudo rm -fvr "$PAYARA_MICRO_ROOT_DIR"
   fi
   payara_kill
-  mvn clean -f app/
+  mvn -T4 clean -f app/
 }
 
 app_build() {
   print_info "APP::BUILD"
-  mvn -T4 clean prepare-package war:exploded -Dmaven.test.skip -f app/
+  app_clean $1
+  mvn -T4 prepare-package war:exploded -Dmaven.test.skip -f app/
+  echo `date +%s` > app/target/app/timestamp
   app_redeploy
 }
 
 app_rebuild() {
   print_info "APP::REBUILD"
   mvn -T4 prepare-package war:exploded -Dmaven.test.skip -f app/
+  echo `date +%s` > app/target/app/timestamp
   app_redeploy
 }
 
@@ -193,12 +203,15 @@ is_database_ready() {
 
 # If you include this function in a another shell script and try using with criu it will fail. This has something todo with the fact that the script opens a new session (needs verification)
 # To be able to use criu use this function directly after source functions.sh
+# TODO: add check if criu is installed and ready to be used
 app_run() {
   payara_kill
-  if [ -d "$CRIU_IMAGE_DIR" ]
+  if [ -d "$CRIU_IMAGE_DIR" ] && [ -d "$PAYARA_MICRO_ROOT_DIR" ]
 	then
 		app_restore
 	else
+    sudo rm -rf "$CRIU_IMAGE_DIR"
+    sudo rm -rf "$PAYARA_MICRO_ROOT_DIR"
 		payara_download
 		payara_run
 		is_app_ready
@@ -233,4 +246,8 @@ print_error() {
   echo -e "${COLOR_RED}[ERROR]${FORMAT_RESET} ------------------------------------------------------------------------"
   echo -e "${COLOR_RED}[ERROR]${FORMAT_RESET}${FORMAT_BOLD} $1 ${FORMAT_RESET}"
   echo -e "${COLOR_RED}[ERROR]${FORMAT_RESET} ------------------------------------------------------------------------"
+}
+
+setup_shortcuts() {
+  echo 'TODO';
 }
