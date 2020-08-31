@@ -39,9 +39,14 @@ database_clean() {
 
 app_clean() {
   print_info "APP::CLEAN"
-  docker kill $DOCKER_APP_CONTAINER_NAME
-  docker rm -f $DOCKER_APP_CONTAINER_NAME
-  docker rmi -f example/app
+  if [ "$1" == "hard" ]
+  then
+    docker kill $DOCKER_APP_CONTAINER_NAME
+    docker rm -f $DOCKER_APP_CONTAINER_NAME
+    docker rmi -f example/app
+    sudo rm -fvr "$CRIU_IMAGE_DIR"
+    sudo rm -fvr "$PAYARA_MICRO_ROOT_DIR"
+  fi
   payara_kill
   mvn clean -f app/
 }
@@ -137,11 +142,6 @@ criu_dump() {
 criu_restore() {
   print_info "CRIU::RESTORE"
   sudo criu-ns restore -vvvv --shell-job --log-file criu-restore.log --tcp-established --images-dir "$CRIU_IMAGE_DIR" &
-}
-
-clean_up() {
-  sudo rm -fr "$CRIU_IMAGE_DIR"
-  sudo rm -fr "$PAYARA_MICRO_ROOT_DIR"
 }
 
 is_app_ready() {
