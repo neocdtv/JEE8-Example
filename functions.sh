@@ -1,4 +1,4 @@
-source environment.sh
+source $JEE8_EXAMPLE_HOME/environment.sh
 TMP_DIR="/var/tmp"
 CRIU_IMAGE_DIR="$TMP_DIR/payaraMicroJEE8ExampleImage"
 PAYARA_MICRO_ROOT_DIR="$TMP_DIR/payaraMicroJEE8Example"
@@ -7,8 +7,7 @@ PAYARA_APP="$TMP_DIR/payara-micro-$PAYARA_VERSION.jar"
 DOCKER_DATABASE_CONTAINER_NAME="jee8-example_database_1"
 DOCKER_APP_CONTAINER_NAME="jee8-example_app_1"
 
-
-jee8_example_all() {
+do_all() {
   database_build
   database_run
   app_build
@@ -18,30 +17,34 @@ jee8_example_all() {
 database_build() {
   database_clean
   print_info "DATABASE::BUILD"
-  docker-compose build database
+  docker-compose -f $JEE8_EXAMPLE_HOME/docker-compose.yml build database
 }
 
 database_run() {
   print_info "DATABASE::RUN"
-  docker-compose up -d database
+  docker-compose -f $JEE8_EXAMPLE_HOME/docker-compose.yml up -d database
   is_database_ready
   if [ $? -ne 0 ]
-    then
-      return 1;
+  then
+    return 1;
   fi
-  mvn prepare-package flyway:migrate -f database/
+  mvn prepare-package flyway:migrate -f $JEE8_EXAMPLE_HOME/database/
 }
 
 database_clean() {
   print_info "DATABASE::CLEAN"
-  mvn flyway:clean -f database/
-  docker kill $DOCKER_DATABASE_CONTAINER_NAME
+  docker ps | grep "$DOCKER_DATABASE_CONTAINER_NAME" &>/dev/null
+  if [ $? == 0 ]
+  then 
+    mvn flyway:clean -f $JEE8_EXAMPLE_HOME/database/
+    docker kill $DOCKER_DATABASE_CONTAINER_NAME
+  fi
   if [ "$1" == "hard" ] 
   then 
     docker rm -f $DOCKER_DATABASE_CONTAINER_NAME
     docker rmi -f example/db
   fi
-  mvn clean -f database/
+  mvn clean -f $JEE8_EXAMPLE_HOME/database/
 }
 
 app_clean() {
@@ -55,28 +58,28 @@ app_clean() {
     sudo rm -fvr "$PAYARA_MICRO_ROOT_DIR"
   fi
   payara_kill
-  mvn -T4 clean -f app/
+  mvn -T4 clean -f $JEE8_EXAMPLE_HOME/app/
 }
 
 app_build() {
   print_info "APP::BUILD"
   app_clean $1
-  mvn -T4 prepare-package war:exploded -Dmaven.test.skip -f app/
-  echo `date +%s` > app/target/app/timestamp
+  mvn -T4 prepare-package war:exploded -Dmaven.test.skip -f $JEE8_EXAMPLE_HOME/app/
+  echo `date +%s` > $JEE8_EXAMPLE_HOME/app/target/app/timestamp
   app_redeploy
 }
 
 app_rebuild() {
   print_info "APP::REBUILD"
-  mvn -T4 prepare-package war:exploded -Dmaven.test.skip -f app/
-  echo `date +%s` > app/target/app/timestamp
+  mvn -T4 prepare-package war:exploded -Dmaven.test.skip -f $JEE8_EXAMPLE_HOME/app/
+  echo `date +%s` > $JEE8_EXAMPLE_HOME/app/target/app/timestamp
   app_redeploy
 }
 
 app_redeploy() {
   print_info "APP::REDEPLOY"
   # get status timestamp
-  echo "" > app/target/app/.reload
+  echo "" > $JEE8_EXAMPLE_HOME/app/target/app/.reload
   # wait for status timestamp to change
   # do it like in app_run
   # remove current criu dump
@@ -123,7 +126,7 @@ payara_run() {
 			    -Xdebug\
 			    -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address="$APP_DEBUG_PORT"\
 			    -jar "$PAYARA_APP" \
-			    --deploy app/target/app\
+			    --deploy $JEE8_EXAMPLE_HOME/app/target/app\
 			    --nocluster \
 			    --contextroot / \
 			    --port "$APP_HTTP_PORT" \
