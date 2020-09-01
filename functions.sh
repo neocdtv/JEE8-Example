@@ -8,14 +8,14 @@ DOCKER_DATABASE_CONTAINER_NAME="jee8-example_database_1"
 DOCKER_APP_CONTAINER_NAME="jee8-example_app_1"
 
 do_all() {
-  database_build
+  database_build $1
   database_run
-  app_build
+  app_build $1
   app_run  
 }
 
 database_build() {
-  database_clean
+  database_clean $1
   print_info "DATABASE::BUILD"
   docker-compose -f $JEE8_EXAMPLE_HOME/docker-compose.yml build database
 }
@@ -54,10 +54,10 @@ app_clean() {
     docker kill $DOCKER_APP_CONTAINER_NAME
     docker rm -f $DOCKER_APP_CONTAINER_NAME
     docker rmi -f example/app
+    payara_kill
     sudo rm -fvr "$CRIU_IMAGE_DIR"
     sudo rm -fvr "$PAYARA_MICRO_ROOT_DIR"
   fi
-  payara_kill
   mvn -T4 clean -f $JEE8_EXAMPLE_HOME/app/
 }
 
