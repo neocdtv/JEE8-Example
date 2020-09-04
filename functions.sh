@@ -159,6 +159,7 @@ criu_restore() {
 
 is_app_ready() {
   check_response_code status 200
+  return $?;
 }
 
 check_response_code() {
@@ -180,6 +181,7 @@ check_response_code() {
   else
     local waited=$((NEXT_WAIT_TIME-1))
     print_info "$prefix - Application is ready to handle http traffic. Waited $waited x $SLEEP_TIME sec. Checked url was $URL."
+    return 0;
   fi
 }
 
@@ -201,7 +203,12 @@ is_database_ready() {
   else
     local waited=$((NEXT_WAIT_TIME-1))
     print_info "$prefix - Database connection is ready. Waited $waited x $SLEEP_TIME sec. Checking with host $DB_HOST, port $DB_PORT, user $RESOURCE_USER, database name $DB_NAME."
+    return 0;
   fi
+}
+
+is_criu_available() {
+  return 0;
 }
 
 # If you include this function in a another shell script and try using with criu it will fail. This has something todo with the fact that the script opens a new session (needs verification)
@@ -209,7 +216,9 @@ is_database_ready() {
 # TODO: add check if criu is installed and ready to be used
 app_run() {
   payara_kill
-  if [ -d "$CRIU_IMAGE_DIR" ] && [ -d "$PAYARA_MICRO_ROOT_DIR" ]
+  is_criu_available
+  local criu_available=$?
+  if [ $criu_available -eq 0 ] && [ -d "$CRIU_IMAGE_DIR" ] && [ -d "$PAYARA_MICRO_ROOT_DIR" ]
 	then
 		app_restore
 	else
@@ -218,12 +227,12 @@ app_run() {
 		payara_download
 		payara_run
 		is_app_ready
-    if [ $? -ne 0 ]
+    local app_ready=$?
+    if [ $criu_available -eq 0 ] && [ $app_ready -eq 0 ]
     then
-      return 1;
+      app_dump
+		  app_restore
     fi
-		app_dump
-		app_restore
   fi
 }
 
