@@ -3,6 +3,6 @@
 ## TODO
 MemoryDatabaseAware, DatabaseAware, RestAndDatabaseAware
 
-GenerateBuilder
+Generate Entity Builder
 
 Generate Entity Tests
