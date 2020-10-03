@@ -2,6 +2,10 @@
 <!DOCTYPE payara-web-app PUBLIC "-//Payara.fish//DTD Payara Server 4 Servlet 3.0//EN"
   "https://raw.githubusercontent.com/payara/Payara-Server-Documentation/master/schemas/payara-web-app_4.dtd">
 <payara-web-app>
+  <!-- disable CDI scanning for WEB-INF/lib/*.jar -->
   <scanning-exclude>*</scanning-exclude>
-  <scanning-include>openapi-ui*</scanning-include>
+  <!-- include CDI scanning for selected libraries in WEB-INF/lib/
+  <scanning-include>first_lib*</scanning-include>
+  <scanning-include>second_lib*</scanning-include>
+  -->
 </payara-web-app>
