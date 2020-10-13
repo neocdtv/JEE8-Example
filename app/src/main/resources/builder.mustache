@@ -1,0 +1,21 @@
+package {{packageName}};
+
+public class {{className}}Builder {
+
+  private {{className}} {{instanceName}} = new {{className}}();
+
+  public static {{className}}Builder create() {
+    return new {{className}}Builder();
+  }
+
+  {{#methods}}
+  public {{className}}Builder {{fieldName}}({{fieldType}} {{fieldName}}) {
+    {{instanceName}}.{{setterName}}({{fieldName}});
+    return this;
+  }
+
+  {{/methods}}
+  public {{className}} get() {
+    return {{instanceName}};
+  }
+}

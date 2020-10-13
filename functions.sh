@@ -7,6 +7,10 @@ PAYARA_APP="$TMP_DIR/payara-micro-$PAYARA_VERSION.jar"
 DOCKER_DATABASE_CONTAINER_NAME="jee8-example_database_1"
 DOCKER_APP_CONTAINER_NAME="jee8-example_app_1"
 
+PAYARA_WARMED_UP_CLASSES_LST="payara-classes.lst"
+PAYARA_WARMED_UP_CLASSES_JSA="payara-classes.jsa"
+PAYARA_WARMED_UP_LAUNCHER="launch-micro.jar"
+
 do_all() {
   database_build $1
   database_run
@@ -112,12 +116,14 @@ payara_kill() {
 }
 
 payara_find() {
-  local pid=`ps -aux | grep java | grep payara-micro | awk '{print $2}'`
+  local pid=`ps -aux | grep java | grep "launch-micro" | awk '{print $2}'`
   echo "$pid"
 }
 
 payara_run() {
   print_info "PAYARA::RUN"
+  payara_download
+  payara_warm_up
   java    -XX:-UsePerfData\
 			    -XX:+TieredCompilation\
 			    -XX:TieredStopAtLevel=1\
@@ -125,12 +131,48 @@ payara_run() {
 			    -Xverify:none\
 			    -Xdebug\
 			    -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address="$APP_DEBUG_PORT"\
-			    -jar "$PAYARA_APP" \
-			    --deploy $JEE8_EXAMPLE_HOME/app/target/app\
+			    -jar "$PAYARA_MICRO_ROOT_DIR/$PAYARA_WARMED_UP_LAUNCHER" \
+			    --deploy "$JEE8_EXAMPLE_HOME/app/target/app"\
 			    --nocluster \
 			    --contextroot / \
-			    --port "$APP_HTTP_PORT" \
-			    --rootDir "$PAYARA_MICRO_ROOT_DIR" &
+			    --port "$APP_HTTP_PORT" &
+}
+
+is_payara_warmed_up() {
+  local payara_root=$1
+  if [ -f "$PAYARA_MICRO_ROOT_DIR/$PAYARA_WARMED_UP_LAUNCHER" ] && [ -f "$PAYARA_MICRO_ROOT_DIR/$PAYARA_WARMED_UP_CLASSES_JSA" ]; then
+    return 0
+  else
+    return 1
+  fi
+}
+
+payara_warm_up() {
+    local prefix="PAYARA::WARM UP"
+    local payara_root="$PAYARA_MICRO_ROOT_DIR"
+    is_payara_warmed_up
+    local payara_warmed_up=$?
+    if [ ! $payara_warmed_up -eq 0 ]; then
+      print_info "$prefix -  Payara at $payara_root is not warmed up (AppCDS). Warming up...";
+      java\
+        -jar "$PAYARA_APP" \
+	      --nocluster\
+	      --rootDir "$payara_root"\
+	      --outputlauncher
+      java\
+        -XX:DumpLoadedClassList="$payara_root/$PAYARA_WARMED_UP_CLASSES_LST"\
+        -jar "$payara_root/$PAYARA_WARMED_UP_LAUNCHER"\
+        --nocluster\
+        --warmup
+      java\
+        -Xshare:dump\
+        -XX:SharedClassListFile="$payara_root/$PAYARA_WARMED_UP_CLASSES_LST"\
+        -XX:SharedArchiveFile="$payara_root/$PAYARA_WARMED_UP_CLASSES_JSA"\
+        -jar "$payara_root/$PAYARA_WARMED_UP_LAUNCHER"\
+        --nocluster
+    else
+      print_info "$prefix - Payara at $payara_root is warmed up (AppCDS).";
+    fi
 }
 
 app_dump() {
@@ -223,8 +265,6 @@ app_run() {
 		app_restore
 	else
     sudo rm -rf "$CRIU_IMAGE_DIR"
-    sudo rm -rf "$PAYARA_MICRO_ROOT_DIR"
-		payara_download
 		payara_run
 		is_app_ready
     local app_ready=$?
