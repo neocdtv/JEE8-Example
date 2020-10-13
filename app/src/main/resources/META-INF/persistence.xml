@@ -13,7 +13,7 @@
             <property name="javax.persistence.schema-generation.database.action" value="none"/>
             <property name="eclipselink.jdbc.batch-writing" value="jdbc" />
             <property name="eclipselink.jdbc.batch-writing.size" value="1000"/>
-            <property name="eclipselink.logging.level" value="WARNING" />
+            <property name="eclipselink.logging.level" value="FINE" />
             <property name="eclipselink.logging.parameters" value="true" />
             <property name="eclipselink.logging.timestamp" value="true" />
             <property name="eclipselink.logging.session" value="false" />

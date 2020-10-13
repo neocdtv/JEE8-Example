@@ -13,7 +13,6 @@ public class Person {
   @Id
   @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = SEQUENCE_NAME)
   @SequenceGenerator(name = SEQUENCE_NAME, sequenceName = SEQUENCE_NAME, allocationSize = 1)
-
   private BigInteger id;
 
   @Column(name = "first_name")
