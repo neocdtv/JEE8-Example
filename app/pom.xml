@@ -5,23 +5,36 @@
   <artifactId>app</artifactId>
   <packaging>war</packaging>
   <version>1.0-SNAPSHOT</version>
+
+  <properties>
+
+    <junit-jupiter-api.version>5.7.0-M1</junit-jupiter-api.version>
+    <payara-version>5.2020.4</payara-version>
+    <postgresql.version>42.2.14</postgresql.version>
+    <versions-maven-plugin.version>2.5</versions-maven-plugin.version>
+    <maven-compiler-plugin.version>3.8.0</maven-compiler-plugin.version>
+    <java.version>11</java.version>
+    <maven-surefire-plugin.version>2.22.0</maven-surefire-plugin.version>
+    <maven-war-plugin.version>3.0.0</maven-war-plugin.version>
+    <tycho-compiler-jdt.version>2.0.0</tycho-compiler-jdt.version>
+  </properties>
   <dependencies>
     <dependency>
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter-api</artifactId>
-      <version>5.7.0-M1</version>
+      <version>${junit-jupiter-api.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>fish.payara.extras</groupId>
       <artifactId>payara-embedded-web</artifactId>
-      <version>5.201</version>
+      <version>${payara-version}</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.postgresql</groupId>
       <artifactId>postgresql</artifactId>
-      <version>42.2.14</version>
+      <version>${postgresql.version}</version>
     </dependency>
 
   </dependencies>
@@ -31,7 +44,7 @@
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>versions-maven-plugin</artifactId>
-        <version>2.5</version>
+        <version>${versions-maven-plugin.version}</version>
         <configuration>
           <generateBackupPoms>false</generateBackupPoms>
         </configuration>
@@ -39,15 +52,18 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
-        <version>3.8.0</version>
+        <version>${maven-compiler-plugin.version}</version>
         <configuration>
-          <release>11</release>
+          <release>${java.version}</release>
+          <source>${java.version}</source>
+          <target>${java.version}</target>
+          <useIncrementalCompilation>false</useIncrementalCompilation>
         </configuration>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
-        <version>2.22.0</version>
+        <version>${maven-surefire-plugin.version}</version>
         <configuration>
           <argLine>
             --illegal-access=permit
@@ -57,7 +73,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-failsafe-plugin</artifactId>
-        <version>2.22.0</version>
+        <version>${maven-surefire-plugin.version}</version>
         <configuration>
           <argLine>
             --illegal-access=permit
@@ -67,8 +83,37 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-war-plugin</artifactId>
-				<version>3.0.0</version>
+				<version>${maven-war-plugin.version}</version>
 			</plugin>
     </plugins>
   </build>
+  <profiles>
+    <profile>
+      <id>development</id>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-compiler-plugin</artifactId>
+            <version>${maven-compiler-plugin.version}</version>
+            <configuration>
+              <useIncrementalCompilation>false</useIncrementalCompilation>
+              <compilerId>jdt</compilerId>
+              <source>${java.version}</source>
+              <target>${java.version}</target>
+              <showWarnings>true</showWarnings>
+              <showDeprecation>true</showDeprecation>
+            </configuration>
+            <dependencies>
+              <dependency>
+                <groupId>org.eclipse.tycho</groupId>
+                <artifactId>tycho-compiler-jdt</artifactId>
+                <version>${tycho-compiler-jdt.version}</version>
+              </dependency>
+            </dependencies>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
 </project>

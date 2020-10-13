@@ -1,3 +1,4 @@
+#!/bin/bash
 source $JEE8_EXAMPLE_HOME/environment.sh
 TMP_DIR="/var/tmp"
 CRIU_IMAGE_DIR="$TMP_DIR/payaraMicroJEE8ExampleImage"
@@ -69,15 +70,25 @@ app_build() {
   print_info "APP::BUILD"
   app_clean $1
   mvn -T4 prepare-package war:exploded -Dmaven.test.skip -f $JEE8_EXAMPLE_HOME/app/
-  echo `date +%s` > $JEE8_EXAMPLE_HOME/app/target/app/timestamp
-  app_redeploy
+  if [ $? -eq 0 ]
+  then
+    echo `date +%s` > $JEE8_EXAMPLE_HOME/app/target/app/timestamp
+    app_redeploy
+  else
+    return $?
+  fi
 }
 
 app_rebuild() {
   print_info "APP::REBUILD"
-  mvn -T4 prepare-package war:exploded -Dmaven.test.skip -f $JEE8_EXAMPLE_HOME/app/
-  echo `date +%s` > $JEE8_EXAMPLE_HOME/app/target/app/timestamp
-  app_redeploy
+  mvn -T4 prepare-package war:exploded -Dmaven.test.skip -o -f $JEE8_EXAMPLE_HOME/app/
+  if [ $? -eq 0 ]
+  then
+    echo `date +%s` > $JEE8_EXAMPLE_HOME/app/target/app/timestamp
+    app_redeploy
+  else
+    return $?
+  fi
 }
 
 app_redeploy() {

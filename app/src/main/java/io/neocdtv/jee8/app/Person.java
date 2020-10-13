@@ -2,6 +2,7 @@ package io.neocdtv.jee8.app;
 
 import javax.persistence.*;
 import java.math.BigInteger;
+import java.util.List;
 
 @Entity
 @Table(name = "t_person")
@@ -20,6 +21,10 @@ public class Person {
 
   @Column(name = "last_name")
   private String lastName;
+
+  @OneToMany
+  @JoinColumn
+  private List<Address> addresses;
 
   public BigInteger getId() {
     return id;

@@ -6,6 +6,8 @@
     <persistence-unit name="example" transaction-type="JTA">
         <jta-data-source>java:global/jdbc/ExampleDataSource</jta-data-source>
         <class>io.neocdtv.jee8.app.Person</class>
+        <class>io.neocdtv.jee8.app.Address</class>
+        <class>io.neocdtv.jee8.app.Organisation</class>
         <exclude-unlisted-classes>true</exclude-unlisted-classes>
         <properties>
             <property name="javax.persistence.schema-generation.database.action" value="none"/>
