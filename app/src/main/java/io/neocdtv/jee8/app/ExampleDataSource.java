@@ -10,8 +10,8 @@ import javax.annotation.sql.DataSourceDefinition;
     user = "${ENV=DB_USER}",
     password = "${ENV=DB_PASS}",
     properties = {
-        "fish.payara.connection-validation-method=table",
-        "fish.payara.validation-table-name=t_flyway_version",
+        "reWriteBatchedInserts=true",
+        "fish.payara.connection-validation-method=meta-data",
         "fish.payara.is-connection-validation-required=true",
         "fish.payara.connection-leak-timeout-in-seconds=5"
     }) // NOSONAR
