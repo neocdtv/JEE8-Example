@@ -12,7 +12,8 @@
         <properties>
             <property name="javax.persistence.schema-generation.database.action" value="none"/>
             <property name="eclipselink.jdbc.batch-writing" value="jdbc" />
-            <property name="eclipselink.jdbc.batch-writing.size" value="1000"/>
+            <!-- Use power of 2, to be in sync with postgres feature reWriteBatchedInserts, which uses also a power of 2 -->
+            <property name="eclipselink.jdbc.batch-writing.size" value="128"/>
             <property name="eclipselink.logging.level" value="FINE" />
             <property name="eclipselink.logging.parameters" value="true" />
             <property name="eclipselink.logging.timestamp" value="true" />
