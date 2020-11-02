@@ -60,7 +60,7 @@ app_clean() {
     docker rm -f $DOCKER_APP_CONTAINER_NAME
     docker rmi -f example/app
     payara_kill
-    sudo rm -fvr "$CRIU_IMAGE_DIR"
+    #sudo rm -fvr "$CRIU_IMAGE_DIR"
     sudo rm -fvr "$PAYARA_MICRO_ROOT_DIR"
   fi
   mvn -T4 clean -f $JEE8_EXAMPLE_HOME/app/
@@ -261,7 +261,8 @@ is_database_ready() {
 }
 
 is_criu_available() {
-  return 0;
+  # false
+  return 1;
 }
 
 # If you include this function in a another shell script and try using with criu it will fail. This has something todo with the fact that the script opens a new session (needs verification)
