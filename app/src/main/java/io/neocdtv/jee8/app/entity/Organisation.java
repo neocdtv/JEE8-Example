@@ -1,4 +1,4 @@
-package io.neocdtv.jee8.app;
+package io.neocdtv.jee8.app.entity;
 
 import javax.persistence.*;
 import java.math.BigInteger;
@@ -11,7 +11,7 @@ public class Organisation {
 
   @Id
   @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = SEQUENCE_NAME)
-  @SequenceGenerator(name = SEQUENCE_NAME, sequenceName = SEQUENCE_NAME, allocationSize = 1)
+  @SequenceGenerator(name = SEQUENCE_NAME, sequenceName = SEQUENCE_NAME, initialValue = 10, allocationSize = 10)
   private BigInteger id;
 
   @Column(name = "name")
