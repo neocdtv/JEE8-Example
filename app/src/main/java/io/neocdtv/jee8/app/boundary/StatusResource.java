@@ -1,4 +1,4 @@
-package io.neocdtv.jee8.app;
+package io.neocdtv.jee8.app.boundary;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;

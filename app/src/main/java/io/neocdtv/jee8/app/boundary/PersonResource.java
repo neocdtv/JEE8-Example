@@ -1,4 +1,6 @@
-package io.neocdtv.jee8.app;
+package io.neocdtv.jee8.app.boundary;
+
+import io.neocdtv.jee8.app.entity.Person;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.persistence.EntityManager;
