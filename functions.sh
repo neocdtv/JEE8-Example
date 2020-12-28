@@ -3,7 +3,7 @@ source $JEE8_EXAMPLE_HOME/environment.sh
 TMP_DIR="/var/tmp"
 CRIU_IMAGE_DIR="$TMP_DIR/payaraMicroJEE8ExampleImage"
 PAYARA_MICRO_ROOT_DIR="$TMP_DIR/payaraMicroJEE8Example"
-PAYARA_VERSION="5.2020.3";
+PAYARA_VERSION="5.2020.5";
 PAYARA_APP="$TMP_DIR/payara-micro-$PAYARA_VERSION.jar"
 DOCKER_DATABASE_CONTAINER_NAME="jee8-example_database_1"
 DOCKER_APP_CONTAINER_NAME="jee8-example_app_1"
@@ -139,13 +139,18 @@ payara_run() {
 			    -XX:+TieredCompilation\
 			    -XX:TieredStopAtLevel=1\
 			    -XX:+UseParallelGC\
+			    -Xshare:on\
+			    -XX:SharedArchiveFile="$PAYARA_MICRO_ROOT_DIR/$PAYARA_WARMED_UP_CLASSES_JSA"\
+			    -Xlog:class+path=info\
 			    -Xverify:none\
 			    -Xdebug\
+			    -Dorg.glassfish.deployment.trace\
 			    -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address="$APP_DEBUG_PORT"\
-			    -jar "$PAYARA_MICRO_ROOT_DIR/$PAYARA_WARMED_UP_LAUNCHER" \
+			    -jar "$PAYARA_MICRO_ROOT_DIR/$PAYARA_WARMED_UP_LAUNCHER"\
 			    --deploy "$JEE8_EXAMPLE_HOME/app/target/app"\
 			    --nocluster \
 			    --contextroot / \
+			    --prebootcommandfile "$JEE8_EXAMPLE_HOME/app/target/app/WEB-INF/classes/preboot.txt" \
 			    --port "$APP_HTTP_PORT" &
 }
 
