@@ -6,6 +6,7 @@
     <persistence-unit name="example" transaction-type="JTA">
         <jta-data-source>java:global/jdbc/ExampleDataSource</jta-data-source>
         <class>io.neocdtv.jee8.app.entity.Person</class>
+        <class>io.neocdtv.jee8.app.entity.Employee</class>
         <class>io.neocdtv.jee8.app.entity.Address</class>
         <class>io.neocdtv.jee8.app.entity.Organisation</class>
         <exclude-unlisted-classes>true</exclude-unlisted-classes>
@@ -14,7 +15,7 @@
             <property name="eclipselink.jdbc.batch-writing" value="jdbc" />
             <!-- Use power of 2, to be in sync with postgres feature reWriteBatchedInserts, which uses also a power of 2 -->
             <property name="eclipselink.jdbc.batch-writing.size" value="128"/>
-            <property name="eclipselink.logging.level" value="FINE" />
+            <property name="eclipselink.logging.level" value="WARNING" />
             <property name="eclipselink.logging.parameters" value="true" />
             <property name="eclipselink.logging.timestamp" value="true" />
             <property name="eclipselink.logging.session" value="false" />
@@ -24,12 +25,14 @@
             <property name="eclipselink.cache.type.default" value="NONE"/>
 
             <!-- config which may speed up deployment -->
+            <!--
             <property name="eclipselink.orm.validate.schema" value="false"/>
             <property name="eclipselink.canonicalmodel.load_xml" value="false"/>
             <property name="eclipselink.exclude-eclipselink-orm" value="true"/>
             <property name="eclipselink.jpql.validation" value="None"/>
             <property name="eclipselink.validation-only" value="true"/>
             <property name="eclipselink.target-database" value="PostgreSQL"/>
+            -->
         </properties>
     </persistence-unit>
 </persistence>

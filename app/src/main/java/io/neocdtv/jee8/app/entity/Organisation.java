@@ -11,7 +11,7 @@ public class Organisation {
 
   @Id
   @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = SEQUENCE_NAME)
-  @SequenceGenerator(name = SEQUENCE_NAME, sequenceName = SEQUENCE_NAME, initialValue = 10, allocationSize = 10)
+  @SequenceGenerator(name = SEQUENCE_NAME, sequenceName = SEQUENCE_NAME, initialValue = 100, allocationSize = 100)
   private BigInteger id;
 
   @Column(name = "name")

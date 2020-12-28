@@ -13,7 +13,6 @@ import javax.annotation.sql.DataSourceDefinition;
         "reWriteBatchedInserts=true",
         "fish.payara.connection-validation-method=meta-data",
         "fish.payara.is-connection-validation-required=true",
-        "fish.payara.connection-leak-timeout-in-seconds=5"
     }) // NOSONAR
 public final class ExampleDataSource {
 

@@ -6,10 +6,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(name = "t_person")
-public class Person {
+@Table(name = "t_employee")
+public class Employee {
 
-  public static final String SEQUENCE_NAME = "sq_person";
+  public static final String SEQUENCE_NAME = "sq_employee";
 
   @Id
   @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = SEQUENCE_NAME)
@@ -20,10 +20,7 @@ public class Person {
   private String firstName;
 
   @Column(name = "last_name")
-  private String lastName;
-
-  @OneToMany(mappedBy = "person", cascade = CascadeType.ALL, orphanRemoval = true)
-  private List<Address> addresses = new ArrayList<>();
+  private String lastName;;
 
   public BigInteger getId() {
     return id;
@@ -47,20 +44,5 @@ public class Person {
 
   public void setLastName(String lastName) {
     this.lastName = lastName;
-  }
-
-  public List<Address> getAddresses() {
-    return addresses;
-  }
-
-  public void addAddresses(final List<Address> addresses) {
-    addresses.forEach(address -> {
-      addAddress(address);
-    });
-  }
-
-  public void addAddress(final Address address) {
-    address.setPerson(this);
-    addresses.add(address);
   }
 }

@@ -1,5 +1,6 @@
 package io.neocdtv.jee8.app;
 
+import io.neocdtv.jee8.app.boundary.EmployeeResource;
 import io.neocdtv.jee8.app.boundary.PersonResource;
 import io.neocdtv.jee8.app.boundary.StatusResource;
 import org.glassfish.jersey.server.ServerProperties;
@@ -19,6 +20,7 @@ public class JEE8App extends Application {
     final Set<Class<?>> classes = new HashSet<>();
     classes.add(PersonResource.class);
     classes.add(StatusResource.class);
+    classes.add(EmployeeResource.class);
     return classes;
   }
 
