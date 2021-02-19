@@ -125,6 +125,7 @@ public class EmployeeResource {
       });
       insert(queue, mapped);
       System.out.println("Inserted batch into queue with size: " + batch.size());
+      cursor.releasePrevious();
     }
     System.out.println("Completed reading into queue.");
     cursor.close();
