@@ -1,30 +1,26 @@
-package io.neocdtv.jee8.app;
+package io.neocdtv.jee8.app.entity;
 
 import javax.persistence.*;
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(name = "t_person")
-public class Person {
+@Table(name = "t_employee")
+public class Employee {
 
-  public static final String SEQUENCE_NAME = "sq_person";
+  public static final String SEQUENCE_NAME = "sq_employee";
 
   @Id
   @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = SEQUENCE_NAME)
-  @SequenceGenerator(name = SEQUENCE_NAME, sequenceName = SEQUENCE_NAME, allocationSize = 1)
-
+  @SequenceGenerator(name = SEQUENCE_NAME, sequenceName = SEQUENCE_NAME, initialValue = 100, allocationSize = 100)
   private BigInteger id;
 
   @Column(name = "first_name")
   private String firstName;
 
   @Column(name = "last_name")
-  private String lastName;
-
-  @OneToMany
-  @JoinColumn
-  private List<Address> addresses;
+  private String lastName;;
 
   public BigInteger getId() {
     return id;

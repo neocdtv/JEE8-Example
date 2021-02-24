@@ -1,0 +1,2 @@
+create-managed-executor-service --corepoolsize=0 --maximumpoolsize=2 --taskqueuecapacity=2 --longrunningtasks=false concurrent/readBatch
+create-managed-executor-service --corepoolsize=0 --maximumpoolsize=4 --taskqueuecapacity=2 --longrunningtasks=false concurrent/writeBatch

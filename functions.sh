@@ -3,10 +3,14 @@ source $JEE8_EXAMPLE_HOME/environment.sh
 TMP_DIR="/var/tmp"
 CRIU_IMAGE_DIR="$TMP_DIR/payaraMicroJEE8ExampleImage"
 PAYARA_MICRO_ROOT_DIR="$TMP_DIR/payaraMicroJEE8Example"
-PAYARA_VERSION="5.2020.3";
+PAYARA_VERSION="5.2020.5";
 PAYARA_APP="$TMP_DIR/payara-micro-$PAYARA_VERSION.jar"
 DOCKER_DATABASE_CONTAINER_NAME="jee8-example_database_1"
 DOCKER_APP_CONTAINER_NAME="jee8-example_app_1"
+
+PAYARA_WARMED_UP_CLASSES_LST="payara-classes.lst"
+PAYARA_WARMED_UP_CLASSES_JSA="payara-classes.jsa"
+PAYARA_WARMED_UP_LAUNCHER="launch-micro.jar"
 
 do_all() {
   database_build $1
@@ -56,7 +60,7 @@ app_clean() {
     docker rm -f $DOCKER_APP_CONTAINER_NAME
     docker rmi -f example/app
     payara_kill
-    sudo rm -fvr "$CRIU_IMAGE_DIR"
+    #sudo rm -fvr "$CRIU_IMAGE_DIR"
     sudo rm -fvr "$PAYARA_MICRO_ROOT_DIR"
   fi
   mvn -T4 clean -f $JEE8_EXAMPLE_HOME/app/
@@ -123,25 +127,68 @@ payara_kill() {
 }
 
 payara_find() {
-  local pid=`ps -aux | grep java | grep payara-micro | awk '{print $2}'`
+  local pid=`ps -aux | grep java | grep "launch-micro" | awk '{print $2}'`
   echo "$pid"
 }
 
 payara_run() {
   print_info "PAYARA::RUN"
+  payara_download
+  payara_warm_up
   java    -XX:-UsePerfData\
 			    -XX:+TieredCompilation\
 			    -XX:TieredStopAtLevel=1\
 			    -XX:+UseParallelGC\
+			    -Xshare:on\
+			    -XX:SharedArchiveFile="$PAYARA_MICRO_ROOT_DIR/$PAYARA_WARMED_UP_CLASSES_JSA"\
+			    -Xlog:class+path=info\
 			    -Xverify:none\
 			    -Xdebug\
+			    -Dorg.glassfish.deployment.trace\
 			    -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address="$APP_DEBUG_PORT"\
-			    -jar "$PAYARA_APP" \
-			    --deploy $JEE8_EXAMPLE_HOME/app/target/app\
+			    -jar "$PAYARA_MICRO_ROOT_DIR/$PAYARA_WARMED_UP_LAUNCHER"\
+			    --deploy "$JEE8_EXAMPLE_HOME/app/target/app"\
 			    --nocluster \
 			    --contextroot / \
-			    --port "$APP_HTTP_PORT" \
-			    --rootDir "$PAYARA_MICRO_ROOT_DIR" &
+			    --prebootcommandfile "$JEE8_EXAMPLE_HOME/app/target/app/WEB-INF/classes/preboot.txt" \
+			    --port "$APP_HTTP_PORT" &
+}
+
+is_payara_warmed_up() {
+  local payara_root=$1
+  if [ -f "$PAYARA_MICRO_ROOT_DIR/$PAYARA_WARMED_UP_LAUNCHER" ] && [ -f "$PAYARA_MICRO_ROOT_DIR/$PAYARA_WARMED_UP_CLASSES_JSA" ]; then
+    return 0
+  else
+    return 1
+  fi
+}
+
+payara_warm_up() {
+    local prefix="PAYARA::WARM UP"
+    local payara_root="$PAYARA_MICRO_ROOT_DIR"
+    is_payara_warmed_up
+    local payara_warmed_up=$?
+    if [ ! $payara_warmed_up -eq 0 ]; then
+      print_info "$prefix -  Payara at $payara_root is not warmed up (AppCDS). Warming up...";
+      java\
+        -jar "$PAYARA_APP" \
+	      --nocluster\
+	      --rootDir "$payara_root"\
+	      --outputlauncher
+      java\
+        -XX:DumpLoadedClassList="$payara_root/$PAYARA_WARMED_UP_CLASSES_LST"\
+        -jar "$payara_root/$PAYARA_WARMED_UP_LAUNCHER"\
+        --nocluster\
+        --warmup
+      java\
+        -Xshare:dump\
+        -XX:SharedClassListFile="$payara_root/$PAYARA_WARMED_UP_CLASSES_LST"\
+        -XX:SharedArchiveFile="$payara_root/$PAYARA_WARMED_UP_CLASSES_JSA"\
+        -jar "$payara_root/$PAYARA_WARMED_UP_LAUNCHER"\
+        --nocluster
+    else
+      print_info "$prefix - Payara at $payara_root is warmed up (AppCDS).";
+    fi
 }
 
 app_dump() {
@@ -219,7 +266,8 @@ is_database_ready() {
 }
 
 is_criu_available() {
-  return 0;
+  # false
+  return 1;
 }
 
 # If you include this function in a another shell script and try using with criu it will fail. This has something todo with the fact that the script opens a new session (needs verification)
@@ -234,8 +282,6 @@ app_run() {
 		app_restore
 	else
     sudo rm -rf "$CRIU_IMAGE_DIR"
-    sudo rm -rf "$PAYARA_MICRO_ROOT_DIR"
-		payara_download
 		payara_run
 		is_app_ready
     local app_ready=$?

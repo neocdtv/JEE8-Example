@@ -10,10 +10,9 @@ import javax.annotation.sql.DataSourceDefinition;
     user = "${ENV=DB_USER}",
     password = "${ENV=DB_PASS}",
     properties = {
-        "fish.payara.connection-validation-method=custom-validation",
-        "fish.payara.validation-classname=org.glassfish.api.jdbc.validation.PostgresConnectionValidation",
+        "reWriteBatchedInserts=true",
+        "fish.payara.connection-validation-method=meta-data",
         "fish.payara.is-connection-validation-required=true",
-        "fish.payara.connection-leak-timeout-in-seconds=5"
     }) // NOSONAR
 public final class ExampleDataSource {
 

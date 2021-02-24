@@ -17,6 +17,8 @@
     <maven-surefire-plugin.version>2.22.0</maven-surefire-plugin.version>
     <maven-war-plugin.version>3.0.0</maven-war-plugin.version>
     <tycho-compiler-jdt.version>2.0.0</tycho-compiler-jdt.version>
+    <commons-lang3.version>3.11</commons-lang3.version>
+    <commons-collections4.version>4.4</commons-collections4.version>
   </properties>
   <dependencies>
     <dependency>
@@ -36,6 +38,19 @@
       <artifactId>postgresql</artifactId>
       <version>${postgresql.version}</version>
     </dependency>
+    <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-lang3 -->
+    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-lang3</artifactId>
+      <version>${commons-lang3.version}</version>
+    </dependency>
+    <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-collections4 -->
+    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-collections4</artifactId>
+      <version>${commons-collections4.version}</version>
+    </dependency>
+
 
   </dependencies>
   <build>
@@ -87,33 +102,4 @@
 			</plugin>
     </plugins>
   </build>
-  <profiles>
-    <profile>
-      <id>development</id>
-      <build>
-        <plugins>
-          <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-compiler-plugin</artifactId>
-            <version>${maven-compiler-plugin.version}</version>
-            <configuration>
-              <useIncrementalCompilation>false</useIncrementalCompilation>
-              <compilerId>jdt</compilerId>
-              <source>${java.version}</source>
-              <target>${java.version}</target>
-              <showWarnings>true</showWarnings>
-              <showDeprecation>true</showDeprecation>
-            </configuration>
-            <dependencies>
-              <dependency>
-                <groupId>org.eclipse.tycho</groupId>
-                <artifactId>tycho-compiler-jdt</artifactId>
-                <version>${tycho-compiler-jdt.version}</version>
-              </dependency>
-            </dependencies>
-          </plugin>
-        </plugins>
-      </build>
-    </profile>
-  </profiles>
 </project>
