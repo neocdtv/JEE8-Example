@@ -20,6 +20,10 @@ public class Address {
   @ManyToOne(fetch = FetchType.LAZY)
   private Person person;
 
+  @OneToOne
+  @JoinColumn(name = "flat_id", referencedColumnName = "id")
+  private Flat flat;
+
   public BigInteger getId() {
     return id;
   }
@@ -42,5 +46,13 @@ public class Address {
 
   public void setPerson(Person person) {
     this.person = person;
+  }
+
+  public Flat getFlat() {
+    return flat;
+  }
+
+  public void setFlat(Flat flat) {
+    this.flat = flat;
   }
 }

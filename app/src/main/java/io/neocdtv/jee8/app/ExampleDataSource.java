@@ -18,6 +18,7 @@ public final class ExampleDataSource {
 
   public static final String JNDI = "java:global/jdbc/ExampleDataSource";
 
-  private ExampleDataSource() {}
+  private ExampleDataSource() {
+  }
 
 }
