@@ -10,7 +10,7 @@
 
     <junit-jupiter-api.version>5.7.0-M1</junit-jupiter-api.version>
     <payara-version>5.2020.4</payara-version>
-    <postgresql.version>42.2.14</postgresql.version>
+    <postgresql.version>42.4.1</postgresql.version>
     <versions-maven-plugin.version>2.5</versions-maven-plugin.version>
     <maven-compiler-plugin.version>3.8.1</maven-compiler-plugin.version>
     <java.version>11</java.version>
